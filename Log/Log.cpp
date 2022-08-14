@@ -29,6 +29,10 @@ void Log::startEvent(logType_t logType, string const& message)
 	{
 		throw invalid_argument("wrong log type");
 	}
+	if(!isWritingAllowed_)
+	{
+		return;
+	}
 	
 	string dataToLog;
 	dataToLog.append(CHARLINES[logType] + '\n');
@@ -46,6 +50,10 @@ void Log::endEvent(logType_t logType, string const& message)
 	{
 		throw invalid_argument("wrong log type");
 	}
+	if(!isWritingAllowed_)
+	{
+		return;
+	}
 	
 	string dataToLog;
 	dataToLog.append(" # [" + getDate() + "] - " + HEADLINEINFO[logType] + " - " + message + " - " + EVENTS[1] + '\n');
@@ -53,7 +61,7 @@ void Log::endEvent(logType_t logType, string const& message)
 	
 	logFile_.write(dataToLog.c_str(), dataToLog.size());
 	logFile_.flush();
-	
+
 	isEvent_ = false;
 }
 
@@ -66,6 +74,10 @@ void Log::writeToLog(levelType_t levelType, string const& message)
 	if (!isCorrectlevelType(levelType))
 	{
 		throw invalid_argument("wrong level type");
+	}
+	if(!isWritingAllowed_)
+	{
+		return;
 	}
 	
 	string dataToLog;
