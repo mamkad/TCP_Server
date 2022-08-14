@@ -35,6 +35,7 @@ void Log::startEvent(logType_t logType, string const& message)
 	dataToLog.append(" # [" + getDate() + "] - " + HEADLINEINFO[logType] + " - " + message + " - " + EVENTS[0] + '\n');
 	
 	logFile_.write(dataToLog.c_str(), dataToLog.size());
+	logFile_.flush();
 	
 	isEvent_ = true;
 }
@@ -51,7 +52,8 @@ void Log::endEvent(logType_t logType, string const& message)
 	dataToLog.append(CHARLINES[logType] + '\n');
 	
 	logFile_.write(dataToLog.c_str(), dataToLog.size());
-
+	logFile_.flush();
+	
 	isEvent_ = false;
 }
 
@@ -70,6 +72,7 @@ void Log::writeToLog(levelType_t levelType, string const& message)
 	dataToLog.append(PREFIXS[levelType] +  message + '\n');
 	
 	logFile_.write(dataToLog.c_str(), dataToLog.size());
+	logFile_.flush();
 }
 
 string Log::getDate()
