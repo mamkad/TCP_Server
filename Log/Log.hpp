@@ -25,6 +25,11 @@ public:
 public:
     Log& operator= (Log const&) = delete;
     Log& operator= (Log&&)      = delete;
+public:	
+	inline setWriteAllow(bool isWritingAllowed) noexcept
+	{
+		isWritingAllowed_ = isWritingAllowed;
+	}
 public:
     void startEvent(logType_t,   string const&);
 	void endEvent(logType_t,     string const&);
@@ -36,7 +41,6 @@ private:
 	{
 		return (logType == INFO || logType == WARNING || logType == ERROR);
 	}
-	
 	inline bool isCorrectlevelType(levelType_t levelType) noexcept
 	{
 		return (levelType == MAIN || levelType == STEP || levelType == RESULT);
