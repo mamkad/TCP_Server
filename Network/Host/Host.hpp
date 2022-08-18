@@ -3,7 +3,7 @@
 #include "../Config/Config.hpp"
 #include "Connection.hpp"
 
-class Host
+class Host final
 {
 private:
 	enum {IPLEN = 15};

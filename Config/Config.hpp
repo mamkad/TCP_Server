@@ -2,7 +2,7 @@
 
 #include "../Json/Json.hpp"
 
-class Config
+class Config final
 {
 private:
 	Json jsonFile;

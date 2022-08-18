@@ -9,7 +9,7 @@ using std::ofstream;
 enum logType_t   {INFO = 0, WARNING = 1, ERROR = 2};
 enum levelType_t {MAIN = 0, STEP = 1, RESULT = 2};
 
-class Log
+class Log final
 {
 private:
 	string logFileName_;
