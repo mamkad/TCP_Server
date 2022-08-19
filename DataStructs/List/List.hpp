@@ -37,6 +37,11 @@ private:
 public:
     List();
     ~List();
+    List(List const&);
+    List(List&&);
+public:
+    List& operator=(List const&);
+    List& operator=(List&&);
 public:
     void push(Type_t const& newValue);
     void pop();

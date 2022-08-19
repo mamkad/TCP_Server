@@ -4,6 +4,9 @@
 #include "../../Config/Config.hpp"
 #include "Connection.hpp"
 
+#include <thread>
+#include <atomic>
+
 class Host final
 {
 private:
@@ -22,4 +25,8 @@ public:
 	Host& operator= (Host&&)      = delete;
 public:
 	int run();
+	//void work();
+
+	//std::thread task_;
+	//std::atomic<bool> isRunning_;
 };

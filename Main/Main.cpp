@@ -7,7 +7,12 @@ int main(int argc, char** argv)
 	Host server(config);
 	//Log log;
 	//Server server;
-
-	
-	return server.run();
+	try {
+		server.run();
+	}
+	catch(exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	return 0;
 }
