@@ -1,11 +1,13 @@
-#include "../TCP_Server/TCP_Server.hpp"
+#include "../Network/Host/Host.hpp"
 #include "../Config/Config.hpp"
 
 int main(int argc, char** argv)
 {
 	Config config;
-	Log log;
-	Server server;
+	Host server(config);
+	//Log log;
+	//Server server;
+
 	
 	return server.run();
 }

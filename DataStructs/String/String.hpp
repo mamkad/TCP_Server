@@ -27,8 +27,9 @@ public:
 	char& operator[] (size_t);
 	char const& operator[] (size_t) const;
 public:
-	size_t len()     const noexcept;
-	bool   empty() const noexcept;
+	inline size_t len()   const noexcept;
+	inline bool   empty() const noexcept;
+	char const* const getPtr() const noexcept;
 public:
 	void clear();
 	void reserve(size_t);

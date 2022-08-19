@@ -18,12 +18,12 @@ using namespace std;
 
 String::String() : len_(0), buff_(nullptr)
 {
-	cout << "std"<< endl;
+	cout << "std String"<< endl;
 }
 
 String::String(char const* CstyleString) : len_(strlen(CstyleString) + 1) , buff_(new char[len_])
 {
-	cout << "cstryle"<< endl;
+	cout << "cstryle String"<< endl;
 	strncpy(buff_, CstyleString, len_ - 1);
 	buff_[len_ - 1] = '\0';
 }
@@ -42,7 +42,7 @@ String::String(size_t sze) : len_(sze + 1), buff_(new char[len_])
 
 String::String(String const& otherString) : len_(otherString.len_), buff_(new char[len_])
 {
-	cout << "const&"<< endl;
+	cout << "const& String"<< endl;
 	strncpy(buff_, otherString.buff_, len_ - 1);
 	buff_[len_ - 1] = '\0';
 }
@@ -50,13 +50,13 @@ String::String(String const& otherString) : len_(otherString.len_), buff_(new ch
 
 String::String(String&& otherString) noexcept : len_(0), buff_(nullptr)
 {
-	cout << "&&"<< endl;
+	cout << "&& String"<< endl;
 	*this = move(otherString);
 }
 
 String::~String()
 {
-	cout << "~ ";
+	cout << "~ String";
 	clear();
 }
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ String& String::operator= (String const& otherString)
 {
 	if (this != &otherString)
 	{
-		cout << "=&"<< endl;
+		cout << "=& String"<< endl;
 		clear();
 		
 		len_ = otherString.len_;
@@ -81,7 +81,7 @@ String& String::operator= (String&& otherString) noexcept
 {
 	if (this != &otherString)
 	{
-		cout << "=&&"<< endl;
+		cout << "=&& String"<< endl;
 		clear();
 		
 		len_ = otherString.len_;
@@ -119,7 +119,7 @@ char const& String::operator[] (size_t index) const
 	return buff_[index];
 }
 // --------------------------------------------------------------------------------------------------------------------------------
-size_t String::len() const noexcept
+inline size_t String::len() const noexcept
 {
 	if (empty())
 	{
@@ -129,9 +129,14 @@ size_t String::len() const noexcept
 	return len_ - 1;
 }
 
-bool String::empty() const noexcept
+inline bool String::empty() const noexcept
 {
 	return len_ == 0 && buff_ == nullptr;
+}
+
+char const* const String::getPtr() const noexcept
+{
+	return buff_;
 }
 // --------------------------------------------------------------------------------------------------------------------------------
 void String::clear()
@@ -142,7 +147,7 @@ void String::clear()
 		//throw logic_error("string is alreay empty");
 		return;
 	}
-	cout << "deleting" << endl;
+	cout << "deleting String" << endl;
 	len_ = 0;
 	delete[] buff_;
 	buff_ = nullptr;

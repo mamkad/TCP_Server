@@ -1,18 +1,28 @@
 #pragma once 
 
-#include <netinet/in.h>
+#include "../../DataStructs/String/String.hpp"
 
-class Port
+#include <netinet/in.h>
+#include <cstring>
+
+class Connection final
 {
 private:
 	enum {PORTLEN = 4};
-private:
-	 char port[PORTLEN];
-	 sockaddr_in fullAddress; 
+private:	
+	int serverFD_;
+	String      port_;
+	sockaddr_in fullAddress_; 
 public:
-	Port();
-	~Port();
+	Connection(String const&, String const&); // Config const& config
+	~Connection();
+public:
+	inline int getServerFd() const noexcept;
 private:
-	static void setAddress(sockaddr_in&, char*);
-	static void setSocket();
+	static void setSocket(int& serverFD);
+	static void setAddress(sockaddr_in&, String const&, String const&);
+	static void setBind(int, sockaddr_in&);
+	static void setListen(int, int);
+private:
+	static int Accept(int, sockaddr_in&);
 };

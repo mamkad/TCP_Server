@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../Json/Json.hpp"
-
+#include "../DataStructs/String/String.hpp"
 class Config final
 {
 private:
-	Json jsonFile;
+	String jsonFile;
 public:
 	Config();
 };
