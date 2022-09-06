@@ -23,6 +23,11 @@ Log::~Log()
 	logFile_.close();
 }
 
+void Log::setWriteAllow(bool isWritingAllowed) noexcept
+{
+	isWritingAllowed_ = isWritingAllowed;
+}
+
 void Log::startEvent(logType_t logType, string const& message)
 {
 	if (!isCorrectLogType(logType))
@@ -95,4 +100,13 @@ string Log::getDate()
   std::stringstream ss;
   ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
   return ss.str();
+}
+
+bool Log::isCorrectLogType(logType_t logType) noexcept
+{
+	return (logType == INFO || logType == WARNING || logType == ERROR);
+}
+bool Log::isCorrectlevelType(levelType_t levelType) noexcept
+{
+	return (levelType == MAIN || levelType == STEP || levelType == RESULT);
 }

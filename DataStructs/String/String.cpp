@@ -13,17 +13,17 @@ using std::ostream_iterator;
 using std::ostream;
 using std::istream;
 using std::copy;
-
-using namespace std;
+using std::cout;
+using std::to_string;
 
 String::String() : len_(0), buff_(nullptr)
 {
-	cout << "std String"<< endl;
+	cout << "String()\n";
 }
 
 String::String(char const* CstyleString) : len_(strlen(CstyleString) + 1) , buff_(new char[len_])
 {
-	cout << "cstryle String"<< endl;
+	cout << "String(char const* CstyleString)\n";
 	strncpy(buff_, CstyleString, len_ - 1);
 	buff_[len_ - 1] = '\0';
 }
@@ -42,7 +42,7 @@ String::String(size_t sze) : len_(sze + 1), buff_(new char[len_])
 
 String::String(String const& otherString) : len_(otherString.len_), buff_(new char[len_])
 {
-	cout << "const& String"<< endl;
+	cout << "String(String const& otherString)\n";
 	strncpy(buff_, otherString.buff_, len_ - 1);
 	buff_[len_ - 1] = '\0';
 }
@@ -50,13 +50,13 @@ String::String(String const& otherString) : len_(otherString.len_), buff_(new ch
 
 String::String(String&& otherString) noexcept : len_(0), buff_(nullptr)
 {
-	cout << "&& String"<< endl;
+	cout << "String(String&& otherString)\n";
 	*this = move(otherString);
 }
 
 String::~String()
 {
-	cout << "~ String";
+	cout << "~String()";
 	clear();
 }
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -64,12 +64,12 @@ String& String::operator= (String const& otherString)
 {
 	if (this != &otherString)
 	{
-		cout << "=& String"<< endl;
+		cout << "operator= (String const& otherString)\n";
 		clear();
-		
+
 		len_ = otherString.len_;
 		buff_ = new char [len_];
-		
+
 		strncpy(buff_, otherString.buff_, len_ - 1);
 		buff_[len_ - 1] = '\0';
 	}
@@ -81,12 +81,12 @@ String& String::operator= (String&& otherString) noexcept
 {
 	if (this != &otherString)
 	{
-		cout << "=&& String"<< endl;
+		cout << "operator= (String&& otherString)\n";
 		clear();
-		
+
 		len_ = otherString.len_;
 		buff_ = otherString.buff_;
-		
+
 		otherString.buff_ = nullptr;
 		otherString.len_ = 0;
 	}
@@ -136,6 +136,10 @@ inline bool String::empty() const noexcept
 
 char const* const String::getPtr() const noexcept
 {
+	if (empty())
+	{
+		throw logic_error("string is empty");
+	}
 	return buff_;
 }
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -143,11 +147,10 @@ void String::clear()
 {
 	if (empty())
 	{
-		cout << endl;
 		//throw logic_error("string is alreay empty");
 		return;
 	}
-	cout << "deleting String" << endl;
+	cout << " deleting String\n";
 	len_ = 0;
 	delete[] buff_;
 	buff_ = nullptr;
@@ -163,10 +166,10 @@ void String::reserve(size_t sze)
 	{
 		throw invalid_argument("size is zero");
 	}
-	
+
 	len_ = sze + 1;
 	buff_ = new char [len_];
-	
+
 	memset(buff_, '\0', len_ - 1);
 }
 
@@ -181,11 +184,11 @@ void String::resize(size_t newSize)
 		memset(buff_, '\0', len_ - 1);
 		return;
 	}
-	
+
 	size_t copyLength = newSize < len_ - 1 ? newSize : len_ - 1;
 	len_ = newSize + 1;
 	char* newBuff = new char [len_];
-	
+
 	strncpy(newBuff, buff_, copyLength);
 	buff_[len_ - 1] = '\0';
 }

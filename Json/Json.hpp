@@ -2,4 +2,6 @@
 
 class Json final
 {
+public:
+  Json();
 };

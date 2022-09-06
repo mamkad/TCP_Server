@@ -1,32 +1,28 @@
-#pragma once 
+#pragma once
 
+#include "../Connection/Connection.hpp"
 #include "../../DataStructs/List/List.hpp"
 #include "../../Config/Config.hpp"
-#include "Connection.hpp"
 
-#include <thread>
-#include <atomic>
-
-class Host final
+namespace Network
 {
-private:
-	enum {IPLEN = 15, MAXCONNECT = 10};
-private:
-	String ipAddress_;
-private:
-	List<Connection> connect_;
-public:
-	Host(Config const&);
-	Host(Host const&) = delete;
-	Host(Host&&)      = delete;
-	~Host();
-public:
-	Host& operator= (Host const&) = delete;
-	Host& operator= (Host&&)      = delete;
-public:
-	int run();
-	//void work();
+	class Host
+	{
+	private:
+		String ip;					  // ip
+		List<Connection> connection;  // соединение
+		Log hostLog; 			      // лог сервера
 
-	//std::thread task_;
-	//std::atomic<bool> isRunning_;
-};
+		bool hostIsActive;		      // запуск сервера прошёл успешно и были запущены соединения
+
+	public:
+		Host(Config const& config);	  // конструктор (принимает конфиг с парамтерами)
+		void run();					  // запуск сервера
+
+	public:
+		inline String const& getIP() const noexcept; // получить ip;
+
+	private:
+		void addConnection(); // добавить соединение
+	};
+}

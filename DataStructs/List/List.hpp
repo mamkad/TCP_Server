@@ -10,7 +10,7 @@ using std::move;
 using namespace std;
 
 template<typename Type_t>
-class List
+class List final
 {
 private:
     struct Node 

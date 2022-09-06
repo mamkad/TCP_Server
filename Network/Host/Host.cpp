@@ -13,19 +13,10 @@ Host::~Host()
 	cout << "~Host " <<  endl;
 }
 
-/*
-void Host::work()
-{
-	while(isRunning_)
-	{
-		cout << "hi" << endl;
-	}
-}*/
-
 int Host::run()
 {
-	//isRunning_ = true;
-	//task_ = std::thread(&Host::work, this);
+	throw logic_error("gh");
+	Connection conn(ipAddress_, "8080");
+	//connect_.push(Connection(ipAddress_, "8080"));
 	return 0;
 }
-
