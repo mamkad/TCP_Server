@@ -82,41 +82,46 @@ namespace DataStructs
     // загрузить файл
     void File::load(String const& filename)   
     {
-        if (!empty())
-            throw logic_error("dsdsd");
-
-        // открываем файл
-        ifstream fileIn(filename.getPtr(), ifstream::binary);
-        
-        // проверяем, что удалось открыть
-        if (fileIn)
+        if (empty())
         {
-            // получаем длину содержимого файла
-            fileIn.seekg(0, std::ios::end);
-            size_t size = fileIn.tellg();
+            // открываем файл
+            ifstream fileIn(filename.getPtr(), ifstream::binary);
+            
+            // проверяем, что удалось открыть
+            if (fileIn)
+            {
+                // получаем длину содержимого файла
+                fileIn.seekg(0, std::ios::end);
+                size_t size = fileIn.tellg();
 
-            // резервируем память достаточного размера
-            char * tmpBuff = new char [size + 1];
+                // резервируем память достаточного размера
+                char * tmpBuff = new char [size + 1];
 
-            // записываем в буфер
-            fileIn.seekg (0, std::ios::beg);
-            fileIn.read(tmpBuff, size); 
-            tmpBuff[size] = '\0';
+                // записываем в буфер
+                fileIn.seekg (0, std::ios::beg);
+                fileIn.read(tmpBuff, size); 
+                tmpBuff[size] = '\0';
 
-            // преобразуем в string и чистим буфер
-            fileData = tmpBuff;
-            delete[] tmpBuff;
-            tmpBuff = nullptr;
+                // преобразуем в string и чистим буфер
+                fileData = tmpBuff;
+                delete[] tmpBuff;
+                tmpBuff = nullptr;
 
-            isEmpty = false;        // ставим флаг
-            fileName = filename;    // ставим имя
+                isEmpty = false;        // ставим флаг
+                fileName = filename;    // ставим имя
 
-            fileIn.close();
+                fileIn.close();
+            }
+            else 
+            {
+                throw logic_error("file not found");
+            }
         }
         else 
         {
-            throw logic_error("file not found");
+            throw logic_error("file is not empty. clear before load new data");
         }
+
     }
 
     // очистить содержимое файла
