@@ -1,221 +1,179 @@
 #include "Socket.hpp"
 
 #include <cstring>
+#include <exception>
+#include <algorithm>
+#include <string>
+#include <iostream>
+
+using std::cout;
+using std::fill;
+
+using std::exception;
+using std::logic_error;
+using std::invalid_argument;
+using std::string;
 
 namespace Network
 {
     // конструктор, принимает ip и порт
-    Socket::Socket(String const& ip, int port, bool createSocketNow) try : fd(-1), fdIsCreated(false)
+    Socket::Socket(String const& ip, int port) : fd_(-1), addressSize_(sizeof(address_))
     {
-        if(createSocketNow)
-        {
-            createSocket();
-            createAddress(ip, port);
-        }
-
         cout << "Socket()\n";
+        create(ip, port);
     }
-    catch(exception const& e)
-    {
-    	throw;
-    }
-
+  
     // виртуальный деструктор, чтобы корректно освобождать ресурсы производных классов 
     Socket::~Socket()                 
     {
-        Close();
         cout << "~Socket()\n";
+        close();
     }
-
-    // cоздание сокета и привязка к его структуре адреса
-    void Socket::createSocket()
-    {
-        if(!isActive())
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    void Socket::create(String const& ip, in_port_t port)
+    {   
+        if(!active())
         {
-            if ( (fd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
+            if ( (fd_ = ::socket(AF_INET, SOCK_STREAM, 0)) < 0 )
             {
-                throw logic_error("Не удалось создать сокет");
+                throw logic_error("Не удалось создать сокет: " + string(strerror(errno)));
             }
 
-            fdIsCreated = true;
+            memset(&address_, '\0', addressSize_);
+            address_.sin_family = AF_INET;
+            address_.sin_port = port;
+            address_.sin_addr.s_addr = inet_addr(ip.ptr());
+
+            if (!address_.sin_addr.s_addr)
+            {
+               ::close(fd_);
+               fd_ = -1;
+               throw invalid_argument("Неправильный ip адрес: " + string(ip.ptr()));
+            }
         }
         else 
         {
             throw invalid_argument("Нельзя создать новый сокет, пока не закрыт текущий");
         }
-    } 
-
-    // инициализация структуры sockaddr_in 
-    void Socket::createAddress(String const& ip, int port)
-    {
-        if(isActive())
-        {
-            memset(&address, '\0', sizeof(address));
-            address.sin_family = AF_INET;
-            address.sin_port = port;
-            address.sin_addr.s_addr = inet_addr(ip.getPtr());
-
-            if (!address.sin_addr.s_addr)
-            {
-                throw invalid_argument("Неправильный ip адрес");
-            }
-        }
-        else 
-        {
-            throw invalid_argument("Нельзя задать новый адресс, пока не открыт текущий сокет");
-        }
-    }
-
+    }    
     // закрыть сокет
-    void Socket::Close()
+    void Socket::close()
     {
-        if (isActive())
+        if (active())
         {
-            fdIsCreated = false;
-            close(fd);
+            if ( ::close(fd_) < 0 )
+            {
+                fd_ = -1;
+                throw logic_error("Ошибка при закрытии сокета: "+ string(strerror(errno)));
+            }
+            fd_ = -1;
+            cout << "closed\n";
         }
     }
 
     // cвязывание адреса с локальным адресом протокола (для серверов)
-    void Socket::Bind()    
+    void Socket::bind()    
     {
-        if (isActive())
+        if (active())
         {
-        	if ( bind(fd, (struct sockaddr*)&address, sizeof(address)) < 0 )
+        	if ( ::bind(fd_, (struct sockaddr*)&address_, addressSize_) < 0 )
             {
-                throw logic_error("Не удалось связать адрес с локалным адресом протокола");
+                throw logic_error("Не удалось связать адрес с локальным адресом протокола: "+ string(strerror(errno)));
             }
         }
         else 
         {
-            throw invalid_argument("Нельзя использовать Bind, пока не открыт сокет");
+            throw invalid_argument("Нельзя использовать bind, пока не открыт сокет");
         }
     }
 
     // перевод сокета в состояние LISTEN (для серверов)
-    void Socket::Listen(int backlog)                 
+    void Socket::listen(int backlog)                 
     {
-        if (isActive())
+        if (active())
         {
-        	if ( listen(fd, backlog) < 0 )
+        	if ( ::listen(fd_, backlog) < 0 )
             {
-                throw logic_error("Не удалось перевести сокет в состояние LISTEN");
+                throw logic_error("Не удалось перевести сокет в состояние LISTEN: " + string(strerror(errno)));
             }
         }
         else 
         {
-            throw invalid_argument("Нельзя использовать Listen, пока не открыт сокет");
+            throw invalid_argument("Нельзя использовать listen, пока не открыт сокет");
         }
     }
 
     // принятие входящих подключений (для серверов)
-    int Socket::Accept()  
+    int Socket::accept()  
     {
-        if (isActive())
+        if (active())
         {
         	int connFd;
-            socklen_t addressSize = sizeof(address);
-
-            if ( (connFd = accept(fd, (struct sockaddr*)&address, &addressSize)) < 0 )
+            if ( (connFd = ::accept(fd_, (struct sockaddr*)&address_, &addressSize_)) < 0 )
             {
-                if (errno == EINTR)
-                {
-                    throw logic_error("Ошибка EINTR");
-                }
-                else 
-                {
-                    throw logic_error("Не удалось получить fd следующего установленного соединения");
-                }
+                throw logic_error("Не удалось получить fd следующего установленного соединения: " + string(strerror(errno)));
             }
             return connFd;
         }
         else 
         {
-            throw invalid_argument("Нельзя использовать Accept, пока не открыт сокет");
+            throw invalid_argument("Нельзя использовать accept, пока не открыт сокет");
         }
     }	
 
     // подключение
-    void Socket::Connect() 
+    void Socket::connect() 
     {
-        if (isActive())
+        if (active())
         {
-        	if ( connect(fd, (struct sockaddr*)&address, sizeof(address)) < 0 )
+        	if ( ::connect(fd_, (struct sockaddr*)&address_, addressSize_) < 0 )
             {
-                throw logic_error("Не удалось установить соединение");
+                throw logic_error("Не удалось установить соединение : " + string(strerror(errno)));
             }
         }
         else 
         {
-            throw invalid_argument("Нельзя использовать Connect, пока не открыт сокет");
+            throw invalid_argument("Нельзя использовать connect, пока не открыт сокет");
         }
     }
-
-    // получить сообщение 
-    int Socket::Recv(array<char, MESSAGESIZE>& buff)       
-    {
-        if (isActive())
-        {
-        	int length = 0;
-        	if ( (length = recv(fd, buff.data(), MESSAGESIZE, 0)) && length < 0 )
-            {
-            	throw logic_error("Ошибка при получении сообщения");
-            }
-            return length;
-        }
-        else 
-        {
-            throw invalid_argument("Нельзя использовать Recv, пока не открыт сокет");
-        }
-    }
-
-    // послать сообщение
-    int Socket::Send(array<char, MESSAGESIZE> const& buff)   
-    {
-        if (isActive())
-        {
-        	int length = 0;
-            if ( (length = send(fd, buff.data(), MESSAGESIZE, 0)) && length < 0 )
-            {
-            	throw logic_error("Ошибка при отправке сообщения");
-            }
-            return length;
-        }
-        else 
-        {
-            throw invalid_argument("Нельзя использовать Send, пока не открыт сокет");
-        }
-    }  
-
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------
     // получить дескриптор
-    int Socket::getFD()  const noexcept
+    int Socket::fd()  const noexcept
     {
-        if (isActive())
-        {
-            return fd;
-        }
-        else 
-        {
-            throw invalid_argument("Сокет закрыт");
-        }
+        return fd_;
     }
 
     // получить структуру адреса
-    sockaddr_in const& Socket::getAddress() const noexcept 
+    sockaddr_in const& Socket::address() const noexcept 
     {
-        if (isActive())
-        {
-            return address;
-        }
-        else 
-        {
-            throw invalid_argument("Сокет закрыт");
-        }
+        return address_;
     }
 
     // активен ли сокет
-    bool Socket::isActive() const noexcept
+    bool Socket::active() const noexcept
     {
-        return fdIsCreated;
+        return (fd_ >= 0);
     }
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // получить сообщение 
+    ssize_t recv(int fd, array<char, MESSSIZE>& buff)       
+    {
+        ssize_t len = 0;
+        if ( (len = ::recv(fd, buff.data(), MESSSIZE, 0)) && len < 0 )
+        {
+            throw logic_error("Ошибка при получении сообщения: " + string(strerror(errno)));
+        }
+        return len;
+    }
+
+    // послать сообщение
+    ssize_t send(int fd, array<char, MESSSIZE> const& buff)   
+    {
+        ssize_t len = 0;
+        if ( (len = ::send(fd, buff.data(), MESSSIZE, 0)) && len < 0 )
+        {
+            throw logic_error("Ошибка при отправке сообщения: " + string(strerror(errno)));
+        }
+        return len;
+    }  
 }

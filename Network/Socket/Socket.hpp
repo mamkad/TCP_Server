@@ -2,54 +2,45 @@
 
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <iostream>
 #include <array>
-#include <exception>
-#include <algorithm>
 
-using std::cout;
 using std::array;
-using std::fill;
-
-using std::exception;
-using std::logic_error;
-using std::invalid_argument;
 
 #include "../../Base/nonAssignNonCopy.hpp"
 #include "../../DataStructs/String/String.hpp"
 
+using DataStructs::String;
+
 namespace Network
 {
+    enum {MESSSIZE = 257}; // размер сообщения + '\0'
+
     class Socket final : private NonAssignable, private NonCopyable
     {
-    protected:
-        enum { MESSAGESIZE = 256 }; // максимальная длина передаваемого сообщения + символ '\0'
     private:  
-        int         fd;          // дескриптор
-        sockaddr_in address;     // структура адреса
-        bool        fdIsCreated; // флаг того, что сокет открыт
+        int           fd_;      // дескриптор
+        sockaddr_in   address_; // структура адреса
+        socklen_t addressSize_; // размер структуры адреса
+      
+    public:
+        Socket(String const& ip, int port); // конструктор, принимает ip, порт и размер сообщения
+        ~Socket();                          // деструктор
 
     public:
-        Socket(String const& ip, int port, bool createSocketNow = true); // конструктор, принимает ip и порт
-        ~Socket();                                                       // деструктор
+        void create(String const& ip, in_port_t port);  // инициализации класса сокета (создание fd и инициализация структуры sockaddr_in)
+        void close();                                   // закрыть сокет
+
+        void bind();               // cвязывание адреса с локальным адресом протокола (для серверов)
+        void listen(int backlog);  // перевод сокета в состояние LISTEN               (для серверов)
+        int  accept();             // принятие входящих подключений                   (для серверов)
+        void connect();            // подключение
 
     public:
-        void createSocket();                            // cоздание сокета
-        void createAddress(String const& ip, int port); // инициализация структуры sockaddr_in (присваиваем ip, порт)
-        void Close();                                   // закрыть сокет
-
-        void Bind();               // cвязывание адреса с локальным адресом протокола (для серверов)
-        void Listen(int backlog);  // перевод сокета в состояние LISTEN               (для серверов)
-        int  Accept();             // принятие входящих подключений                   (для серверов)
-        void Connect();            // подключение
-
-        int Recv(array<char, MESSAGESIZE>& buff);       // получить сообщение 
-        int Send(array<char, MESSAGESIZE> const& buff); // послать  сообщение
-
-    public:
-        inline int getFD()                     const noexcept; // получить дескриптор
-        inline sockaddr_in const& getAddress() const noexcept; // получить структуру адреса
-
-        inline bool isActive() const noexcept; // активен ли сокет
+        int fd()                     const noexcept; // получить дескриптор
+        sockaddr_in const& address() const noexcept; // получить структуру адреса
+        bool active() const noexcept;                // активен ли сокет
     };
+
+    ssize_t recv(int fd, array<char, MESSSIZE>& buff); // получить сообщение 
+    ssize_t send(int fd, array<char, MESSSIZE> const& buff);   // послать сообщение
 }
