@@ -1,52 +1,40 @@
-#include "Connection.hpp"
+#include "Connection.h"
 
-//using std::thread;
-
-namespace Network
+Network::Connection::Connection(Config const& config)
 {
-    Connection::Connection(String const& ip, int prt, String const& netConfigFileName) try : port(prt), socket(ip, prt), connectionLog("ConnectionLog_")
-    {
-        cout << "Connection()\n";
-    }
-    catch(exception const& e)
-    {
-        throw;
-    }
 
-    Connection::~Connection()
-    {
-       cout << "~Connection()\n";
-    }
+}
 
-    void Connection::run()
-    {
-        //while(1)
-        {
+Network::Connection::~Connection()
+{
 
-        }
-    }
+}
 
-    inline int Connection::getPort() const noexcept
-    {
-        return port;
-    }
+void Network::Connection::run()
+{
 
-    // загрузить обработчик в память
-    void Connection::loadHandler(String const& handlerName)
-    {
+}
 
-    }
+void Network::Connection::create(connection_t mode)
+{
+	if (mode == SERVER)
+	{
 
-    // сгрузить обработчик из памяти   
-    void Connection::unloadHandler(String const& handlerName)
-    {
+	}
+	else if (mode == CLIENT)
+	{
 
-    }
+	}
+	else
+	{
 
-    // функция потока работы соединения
-    void Connection::connectionHandler()
-    {
+	}
+}
 
-    } 
-}     
-          
+void Network::Connection::handler()
+{
+	for (;;)
+	{
+
+	}
+}
