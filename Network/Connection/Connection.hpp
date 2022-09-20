@@ -3,27 +3,32 @@
 #include "../Socket/Socket.hpp"
 #include "../../Log/Log.hpp"
 
+#include <memory>
+#include <utility>
+
+using std::shared_ptr;
+using std::make_shared;
+using std::pair;
+
 namespace Network
 {
-	class Connection final 
+	class Connection final
 	{
 	private:
-		int    port;       // порт
-		Socket socket;     // сокет
-		// Netconfig netConf;
-		Log connectionLog; // лог соединения
-
-	public:
-		Connection(String const& ip, int prt, String const& netConfigFileName); // конструктор (Config const& config)
-		~Connection();                         								    // деструктор
-		void run();							   									// запуск соединения на порту. 
-
-	public:
-		inline int getPort() const noexcept;   // получить порт
+		enum connection_t {SERVER = 0, CLIENT = 1}; // тип соединения
 
 	private:
-		void loadHandler(String const& handlerName);   // загрузить обработчик в память
-		void unloadHandler(String const& handlerName); // сгрузить обработчик из памяти
-		void connectionHandler(); 					   // функция потока работы соединения
+		shared_ptr<pair<Socket, Log>>  connection_;
+
+	public:
+		explicit Connection(Config const& config); // конструктор (Config const& config)
+		~Connection();                             // деструктор
+
+	public:
+		void run();
+
+	private:
+		void create(connection_t);
+		void handler();
 	};
 }
